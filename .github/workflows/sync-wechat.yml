@@ -27,7 +27,7 @@ jobs:
           fi
           echo "token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Fetch All Published Articles
+      - name: Fetch Published Articles
         id: fetch
         run: |
           python3 << 'PYEOF'
@@ -35,9 +35,9 @@ jobs:
           from datetime import datetime
 
           access_token = os.environ.get('ACCESS_TOKEN', '')
-          all_articles = {}
-          
-          # 1. 从 freepublish 接口获取新版发布文章
+          api_articles = {}
+
+          # 只从 freepublish 接口获取已发布文章
           offset = 0
           page_size = 20
           while True:
@@ -59,69 +59,37 @@ jobs:
                   date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
                   for news in news_item:
                       url = news.get('url', '')
-                      if url and url not in all_articles:
-                          all_articles[url] = {
+                      if url and url not in api_articles:
+                          api_articles[url] = {
                               'title': news.get('title', ''),
                               'url': url,
                               'thumb': news.get('thumb_url', ''),
-                              'date': date_str,
-                              'source': 'freepublish'
+                              'date': date_str
                           }
               if len(items) < page_size:
                   break
               offset += page_size
-          
-          print(f'freepublish: {len(all_articles)} articles')
-          
-          # 2. 从 material 接口获取素材库文章（覆盖旧版群发）
-          offset = 0
-          page_size = 20
-          material_count = 0
-          while True:
-              cmd = [
-                  'curl', '-s', '-X', 'POST',
-                  f'https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token={access_token}',
-                  '-H', 'Content-Type: application/json',
-                  '-d', json.dumps({'type': 'news', 'offset': offset, 'count': page_size})
-              ]
-              result = subprocess.run(cmd, capture_output=True, text=True)
-              data = json.loads(result.stdout)
-              if 'errcode' in data and data['errcode'] != 0:
-                  print(f'material API error: {data}')
-                  break
-              items = data.get('item', [])
-              for item in items:
-                  news_item = item.get('content', {}).get('news_item', [])
-                  update_time = item.get('update_time', 0)
-                  date_str = datetime.fromtimestamp(update_time).strftime('%Y-%m-%d') if update_time else ''
-                  for news in news_item:
-                      url = news.get('url', '')
-                      if url and url not in all_articles:
-                          all_articles[url] = {
-                              'title': news.get('title', ''),
-                              'url': url,
-                              'thumb': news.get('thumb_url', ''),
-                              'date': date_str,
-                              'source': 'material'
-                          }
-                          material_count += 1
-              if len(items) < page_size:
-                  break
-              offset += page_size
-          
-          print(f'material: {material_count} new articles')
-          
-          # 3. 合并、按日期排序
-          articles = sorted(all_articles.values(), key=lambda x: x.get('date', ''), reverse=True)
-          
-          # 移除source标记
-          for a in articles:
-              a.pop('source', None)
-          
-          with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
-              json.dump(articles, f, ensure_ascii=False, indent=2)
-          
-          print(f'Total: {len(articles)} articles saved')
+
+          print(f'freepublish: {len(api_articles)} articles')
+
+          # 读取已有文章，保留有URL的（非API来源的历史文章）
+          existing_path = 'docs/data/articles.json'
+          if os.path.exists(existing_path):
+              with open(existing_path, 'r', encoding='utf-8') as f:
+                  existing = json.load(f)
+              # 保留已有但API中没有的（历史数据）
+              for a in existing:
+                  url = a.get('url', '')
+                  if url and url not in api_articles:
+                      api_articles[url] = a
+
+          # 合并、按日期倒序
+          all_articles = sorted(api_articles.values(), key=lambda x: x.get('date', ''), reverse=True)
+
+          with open(existing_path, 'w', encoding='utf-8') as f:
+              json.dump(all_articles, f, ensure_ascii=False, indent=2)
+
+          print(f'Total: {len(all_articles)} articles')
           PYEOF
         env:
           ACCESS_TOKEN: ${{ steps.token.outputs.token }}
