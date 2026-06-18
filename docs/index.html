@@ -20,12 +20,18 @@
         a { text-decoration: none; color: inherit; }
         img { max-width: 100%; display: block; }
 
+        /* ========== Desktop Container ========== */
+        .page-wrap {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
         /* ========== Header ========== */
         .header {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(0,0,0,0.06);
@@ -33,6 +39,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
         }
         .header-logo {
             display: flex;
@@ -62,6 +74,18 @@
             background: #003366; border-radius: 1px;
             transition: all 0.3s;
         }
+        .header-nav {
+            display: none;
+            gap: 32px;
+            align-items: center;
+        }
+        .header-nav a {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+            transition: color 0.2s;
+        }
+        .header-nav a:hover { color: #0066cc; }
 
         /* ========== Hero Carousel ========== */
         .hero {
@@ -122,7 +146,7 @@
             width: 18px;
         }
 
-        /* ========== Why Choose Section ========== */
+        /* ========== Section ========== */
         .section {
             padding: 40px 20px;
             background: #fff;
@@ -157,10 +181,7 @@
             color: #003366;
             line-height: 1.2;
         }
-        .stat-unit {
-            font-size: 14px;
-            font-weight: 400;
-        }
+        .stat-unit { font-size: 14px; font-weight: 400; }
         .stat-label {
             font-size: 12px;
             color: #6e6e73;
@@ -197,7 +218,6 @@
         }
         .news-tabs {
             display: flex;
-            gap: 0;
             margin-bottom: 20px;
             border-bottom: 2px solid #e5e5ea;
         }
@@ -213,9 +233,7 @@
             cursor: pointer;
             transition: all 0.3s;
             background: none;
-            border-top: none;
-            border-left: none;
-            border-right: none;
+            border-top: none; border-left: none; border-right: none;
         }
         .news-tab.active {
             color: #003366;
@@ -238,8 +256,7 @@
         .news-item:active { opacity: 0.7; }
         .news-item:last-child { border-bottom: none; padding-bottom: 0; }
         .news-item-img {
-            width: 120px;
-            height: 80px;
+            width: 120px; height: 80px;
             border-radius: 10px;
             overflow: hidden;
             flex-shrink: 0;
@@ -257,28 +274,14 @@
             min-width: 0;
         }
         .news-item-title {
-            font-size: 15px;
-            font-weight: 500;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            font-size: 15px; font-weight: 500; line-height: 1.5;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
             color: #1d1d1f;
         }
-        .news-item-date {
-            font-size: 12px;
-            color: #86868b;
-        }
+        .news-item-date { font-size: 12px; color: #86868b; }
         .news-more {
-            display: block;
-            text-align: center;
-            padding: 14px;
-            color: #0066cc;
-            font-size: 14px;
-            font-weight: 500;
-            margin-top: 12px;
-            cursor: pointer;
+            display: block; text-align: center; padding: 14px;
+            color: #0066cc; font-size: 14px; font-weight: 500; margin-top: 12px; cursor: pointer;
         }
 
         /* ========== Programs Section ========== */
@@ -297,7 +300,7 @@
             overflow: hidden;
             border: 1px solid #e5e5ea;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .program-card:active { transform: scale(0.98); }
         .program-card-header {
@@ -305,26 +308,13 @@
             background: linear-gradient(135deg, #003366, #0066cc);
             color: #fff;
         }
-        .program-card-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+        .program-card-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
         .program-card-tag {
-            display: inline-block;
-            font-size: 11px;
-            background: rgba(255,255,255,0.2);
-            padding: 2px 10px;
-            border-radius: 10px;
+            display: inline-block; font-size: 11px;
+            background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 10px;
         }
-        .program-card-body {
-            padding: 16px 20px;
-        }
-        .program-card-desc {
-            font-size: 13px;
-            color: #6e6e73;
-            line-height: 1.6;
-        }
+        .program-card-body { padding: 16px 20px; }
+        .program-card-desc { font-size: 13px; color: #6e6e73; line-height: 1.6; }
 
         /* ========== CTA Section ========== */
         .cta-section {
@@ -333,149 +323,137 @@
             background: linear-gradient(135deg, #003366 0%, #004d99 50%, #0066cc 100%);
             color: #fff;
         }
-        .cta-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .cta-desc {
-            font-size: 14px;
-            opacity: 0.85;
-            margin-bottom: 24px;
-        }
+        .cta-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .cta-desc { font-size: 14px; opacity: 0.85; margin-bottom: 24px; }
         .cta-btn {
-            display: inline-block;
-            padding: 14px 40px;
-            background: #fff;
-            color: #003366;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: transform 0.2s;
+            display: inline-block; padding: 14px 40px;
+            background: #fff; color: #003366; border-radius: 25px;
+            font-size: 16px; font-weight: 600; transition: transform 0.2s;
         }
         .cta-btn:active { transform: scale(0.95); }
 
         /* ========== Footer ========== */
         .footer {
-            background: #1d1d1f;
-            color: #fff;
-            padding: 40px 20px 32px;
+            background: #1d1d1f; color: #fff; padding: 40px 20px 32px;
         }
-        .footer-school-name {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-        .footer-info {
-            font-size: 13px;
-            color: #a1a1a6;
-            line-height: 2;
-        }
+        .footer-school-name { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+        .footer-info { font-size: 13px; color: #a1a1a6; line-height: 2; }
         .footer-info a { color: #a1a1a6; }
         .footer-links {
-            display: flex;
-            gap: 24px;
-            margin-top: 20px;
-            padding-top: 20px;
+            display: flex; gap: 24px; margin-top: 20px; padding-top: 20px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .footer-link {
-            font-size: 13px;
-            color: #a1a1a6;
-        }
-        .footer-copyright {
-            margin-top: 20px;
-            font-size: 11px;
-            color: #6e6e73;
-        }
+        .footer-link { font-size: 13px; color: #a1a1a6; }
+        .footer-copyright { margin-top: 20px; font-size: 11px; color: #6e6e73; }
 
         /* ========== Nav Drawer ========== */
         .nav-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); z-index: 200;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        .nav-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .nav-overlay.open { opacity: 1; pointer-events: auto; }
         .nav-drawer {
-            position: fixed;
-            top: 0; right: 0;
-            width: 75%;
-            max-width: 300px;
-            height: 100%;
-            background: #fff;
-            z-index: 201;
+            position: fixed; top: 0; right: 0;
+            width: 75%; max-width: 300px; height: 100%;
+            background: #fff; z-index: 201;
             transform: translateX(100%);
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
+            padding: 24px; display: flex; flex-direction: column;
         }
         .nav-drawer.open { transform: translateX(0); }
         .nav-close {
-            align-self: flex-end;
-            width: 32px; height: 32px;
-            background: none; border: none;
-            font-size: 22px;
-            color: #86868b;
-            cursor: pointer;
+            align-self: flex-end; width: 32px; height: 32px;
+            background: none; border: none; font-size: 22px; color: #86868b; cursor: pointer;
         }
-        .nav-links {
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
+        .nav-links { margin-top: 24px; display: flex; flex-direction: column; }
         .nav-link {
-            padding: 14px 0;
-            font-size: 16px;
-            font-weight: 500;
-            color: #1d1d1f;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
+            padding: 14px 0; font-size: 16px; font-weight: 500;
+            color: #1d1d1f; border-bottom: 1px solid #f0f0f0; cursor: pointer;
         }
 
-        /* ========== Loading Skeleton ========== */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        .no-data { text-align: center; padding: 40px 20px; color: #86868b; font-size: 14px; }
 
-        /* ========== No-data placeholder ========== */
-        .no-data {
-            text-align: center;
-            padding: 40px 20px;
-            color: #86868b;
-            font-size: 14px;
+        /* ========== RESPONSIVE: Desktop (>=768px) ========== */
+        @media (min-width: 768px) {
+            .page-wrap {
+                max-width: 960px;
+                margin: 0 auto;
+                background: #fff;
+                box-shadow: 0 0 60px rgba(0,0,0,0.06);
+            }
+            body { background: #f0f0f3; }
+            .header { padding: 0 32px; height: 60px; }
+            .header-menu-btn { display: none; }
+            .header-nav { display: flex; }
+            .header-logo-text { font-size: 16px; }
+            .header-logo-icon { width: 36px; height: 36px; font-size: 16px; border-radius: 10px; }
+            .hero { height: 480px; max-height: 480px; }
+            .hero-slide-overlay { padding: 50px 48px 36px; }
+            .hero-slide-title { font-size: 28px; }
+            .hero-slide-desc { font-size: 15px; }
+            .section { padding: 56px 48px; }
+            .section-title { font-size: 26px; }
+            .section-subtitle { font-size: 14px; }
+            .stats-grid { gap: 20px; }
+            .stat-card { padding: 28px 16px; border-radius: 20px; }
+            .stat-number { font-size: 36px; }
+            .stat-label { font-size: 13px; margin-top: 8px; }
+            .badges { padding: 0 48px 28px; flex-wrap: wrap; overflow-x: visible; }
+            .badge-item { padding: 8px 20px; font-size: 13px; }
+            .news-section { padding: 56px 48px; }
+            .news-tabs { max-width: 300px; }
+            .news-list {
+                display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+            }
+            .news-item {
+                flex-direction: column; border-bottom: none; padding-bottom: 0;
+                border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden;
+                transition: box-shadow 0.2s, transform 0.2s;
+            }
+            .news-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+            .news-item-img { width: 100%; height: 160px; border-radius: 0; }
+            .news-item-content { padding: 16px; }
+            .programs-section { padding: 56px 48px; margin-top: 0; }
+            .program-cards { flex-direction: row; gap: 20px; }
+            .program-card { flex: 1; }
+            .program-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+            .cta-section { padding: 64px 48px; }
+            .cta-title { font-size: 28px; }
+            .cta-btn { font-size: 17px; padding: 16px 48px; }
+            .cta-btn:hover { transform: scale(1.03); }
+            .footer { padding: 48px 48px 36px; }
+            .footer-school-name { font-size: 18px; }
+            .footer-info { font-size: 14px; }
+        }
+        @media (min-width: 1200px) {
+            .page-wrap { max-width: 1100px; }
+            .hero { height: 540px; max-height: 540px; }
+            .hero-slide-title { font-size: 32px; }
+            .news-list { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
+<div class="page-wrap">
     <header class="header">
-        <div class="header-logo">
-            <div class="header-logo-icon">诺</div>
-            <div class="header-logo-text">宁诺附中</div>
+        <div class="header-inner">
+            <div class="header-logo">
+                <div class="header-logo-icon">诺</div>
+                <div class="header-logo-text">宁诺附中</div>
+            </div>
+            <nav class="header-nav">
+                <a href="#home">首页</a>
+                <a href="#news">新闻动态</a>
+                <a href="#programs">招生项目</a>
+                <a href="http://www.unncahs.net/" target="_blank">学校官网</a>
+                <a href="#contact">联系我们</a>
+            </nav>
+            <button class="header-menu-btn" onclick="toggleNav()" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-        <button class="header-menu-btn" onclick="toggleNav()" aria-label="菜单">
-            <span></span><span></span><span></span>
-        </button>
     </header>
-
-    <!-- Nav Drawer -->
     <div class="nav-overlay" id="navOverlay" onclick="toggleNav()"></div>
     <nav class="nav-drawer" id="navDrawer">
         <button class="nav-close" onclick="toggleNav()">✕</button>
@@ -487,8 +465,6 @@
             <a class="nav-link" href="#contact">联系我们</a>
         </div>
     </nav>
-
-    <!-- Hero Carousel -->
     <section class="hero" id="home">
         <div class="hero-track" id="heroTrack">
             <div class="hero-slide">
@@ -515,50 +491,30 @@
         </div>
         <div class="hero-dots" id="heroDots"></div>
     </section>
-
-    <!-- Stats Section -->
     <section class="section">
         <div class="section-title">为什么选择宁诺附中</div>
         <div class="section-subtitle">浙江省一级重点中学 · 省首批一级特色示范学校</div>
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">2016</div>
-                <div class="stat-label">建校年份</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">60%<span class="stat-unit">+</span></div>
-                <div class="stat-label">高级教师占比</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">36<span class="stat-unit">个</span></div>
-                <div class="stat-label">教学班级</div>
-            </div>
+            <div class="stat-card"><div class="stat-number">2016</div><div class="stat-label">建校年份</div></div>
+            <div class="stat-card"><div class="stat-number">60%<span class="stat-unit">+</span></div><div class="stat-label">高级教师占比</div></div>
+            <div class="stat-card"><div class="stat-number">36<span class="stat-unit">个</span></div><div class="stat-label">教学班级</div></div>
         </div>
     </section>
-
-    <!-- Badges -->
     <div class="badges">
         <div class="badge-item">🏅 浙江省现代化学校</div>
         <div class="badge-item">🏅 省一级重点中学</div>
         <div class="badge-item">🏅 省首批特色示范学校</div>
         <div class="badge-item">🏅 省国际理解教育基地</div>
     </div>
-
-    <!-- News Section -->
     <section class="news-section" id="news">
         <div class="news-tabs">
             <button class="news-tab active" data-tab="news" onclick="switchTab('news')">校园新闻</button>
             <button class="news-tab" data-tab="notice" onclick="switchTab('notice')">通知公告</button>
         </div>
         <div class="news-list" id="newsList">
-            <div class="skeleton" style="height:80px;margin-bottom:16px"></div>
-            <div class="skeleton" style="height:80px;margin-bottom:16px"></div>
-            <div class="skeleton" style="height:80px;margin-bottom:16px"></div>
             <div class="no-data">公众号文章同步加载中...</div>
         </div>
     </section>
-
-    <!-- Programs Section -->
     <section class="programs-section" id="programs">
         <div class="section-title">招生项目</div>
         <div class="section-subtitle">多元化培养路径，助力每位学生成长</div>
@@ -568,39 +524,29 @@
                     <div class="program-card-title">博雅（中外课程）班</div>
                     <span class="program-card-tag">海外名校直通车</span>
                 </div>
-                <div class="program-card-body">
-                    <div class="program-card-desc">中西融合课程，与英、美、澳世界名校直接合作，博士班主任领衔，助力申请全球顶尖大学。</div>
-                </div>
+                <div class="program-card-body"><div class="program-card-desc">中西融合课程，与英、美、澳世界名校直接合作，博士班主任领衔，助力申请全球顶尖大学。</div></div>
             </div>
             <div class="program-card" onclick="window.open('http://www.unncahs.net/','_blank')">
                 <div class="program-card-header" style="background:linear-gradient(135deg,#1a5276,#2e86c1)">
                     <div class="program-card-title">英语特色班</div>
                     <span class="program-card-tag">校考+中考</span>
                 </div>
-                <div class="program-card-body">
-                    <div class="program-card-desc">英语特色课程，校考成绩占70%、中考成绩占30%，提前批录取，培养国际化英语人才。</div>
-                </div>
+                <div class="program-card-body"><div class="program-card-desc">英语特色课程，校考成绩占70%、中考成绩占30%，提前批录取，培养国际化英语人才。</div></div>
             </div>
             <div class="program-card" onclick="window.open('http://www.unncahs.net/','_blank')">
                 <div class="program-card-header" style="background:linear-gradient(135deg,#7d3c98,#a569bd)">
                     <div class="program-card-title">美术特长生</div>
                     <span class="program-card-tag">艺术升学</span>
                 </div>
-                <div class="program-card-body">
-                    <div class="program-card-desc">编入普通班学习，同时开设美术选修课和专项辅导，培养扎实艺术素养，助力升入美术专业院校。</div>
-                </div>
+                <div class="program-card-body"><div class="program-card-desc">编入普通班学习，同时开设美术选修课和专项辅导，培养扎实艺术素养，助力升入美术专业院校。</div></div>
             </div>
         </div>
     </section>
-
-    <!-- CTA -->
     <section class="cta-section">
         <div class="cta-title">招生咨询现已开放</div>
         <div class="cta-desc">欢迎家长和学生来电咨询或到校参观</div>
         <a class="cta-btn" href="tel:057483887711">拨打电话咨询</a>
     </section>
-
-    <!-- Footer -->
     <footer class="footer" id="contact">
         <div class="footer-school-name">宁波诺丁汉大学附属中学</div>
         <div class="footer-info">
@@ -615,104 +561,50 @@
         </div>
         <div class="footer-copyright">© 2026 宁波诺丁汉大学附属中学 版权所有</div>
     </footer>
-
-    <script>
-        // ========== Hero Carousel ==========
-        const heroTrack = document.getElementById('heroTrack');
-        const heroDots = document.getElementById('heroDots');
-        const slides = heroTrack.children;
-        let currentSlide = 0;
-        let autoPlayTimer;
-
-        // Create dots
-        for (let i = 0; i < slides.length; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
-            dot.onclick = () => goToSlide(i);
-            heroDots.appendChild(dot);
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            heroTrack.style.transform = `translateX(-${index * 100}%)`;
-            document.querySelectorAll('.hero-dot').forEach((d, i) => {
-                d.className = 'hero-dot' + (i === index ? ' active' : '');
-            });
-        }
-
-        function nextSlide() {
-            goToSlide((currentSlide + 1) % slides.length);
-        }
-
-        function startAutoPlay() {
-            autoPlayTimer = setInterval(nextSlide, 4000);
-        }
-
-        // Touch support
-        let touchStartX = 0;
-        heroTrack.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-            clearInterval(autoPlayTimer);
-        });
-        heroTrack.addEventListener('touchend', e => {
-            const diff = touchStartX - e.changedTouches[0].clientX;
-            if (Math.abs(diff) > 50) {
-                if (diff > 0 && currentSlide < slides.length - 1) goToSlide(currentSlide + 1);
-                if (diff < 0 && currentSlide > 0) goToSlide(currentSlide - 1);
-            }
-            startAutoPlay();
-        });
-
+</div>
+<script>
+    const heroTrack = document.getElementById('heroTrack');
+    const heroDots = document.getElementById('heroDots');
+    const slides = heroTrack.children;
+    let currentSlide = 0, autoPlayTimer;
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        heroDots.appendChild(dot);
+    }
+    function goToSlide(i) {
+        currentSlide = i;
+        heroTrack.style.transform = `translateX(-${i * 100}%)`;
+        document.querySelectorAll('.hero-dot').forEach((d, j) => d.className = 'hero-dot' + (j === i ? ' active' : ''));
+    }
+    function nextSlide() { goToSlide((currentSlide + 1) % slides.length); }
+    function startAutoPlay() { autoPlayTimer = setInterval(nextSlide, 4000); }
+    let touchStartX = 0;
+    heroTrack.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; clearInterval(autoPlayTimer); });
+    heroTrack.addEventListener('touchend', e => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) { if (diff > 0 && currentSlide < slides.length - 1) goToSlide(currentSlide + 1); if (diff < 0 && currentSlide > 0) goToSlide(currentSlide - 1); }
         startAutoPlay();
-
-        // ========== Nav Drawer ==========
-        function toggleNav() {
-            document.getElementById('navOverlay').classList.toggle('open');
-            document.getElementById('navDrawer').classList.toggle('open');
-        }
-
-        // ========== News Tab Switch ==========
-        function switchTab(tab) {
-            document.querySelectorAll('.news-tab').forEach(t => {
-                t.className = 'news-tab' + (t.dataset.tab === tab ? ' active' : '');
-            });
-            loadNews(tab);
-        }
-
-        // ========== Load News from JSON ==========
-        function loadNews(type) {
-            const list = document.getElementById('newsList');
-            const dataFile = type === 'notice' ? 'data/notices.json' : 'data/articles.json';
-
-            fetch(dataFile)
-                .then(r => r.json())
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        list.innerHTML = '<div class="no-data">暂无内容，公众号文章同步中</div>';
-                        return;
-                    }
-                    list.innerHTML = data.map(item => `
-                        <a class="news-item" href="${item.url}" target="_blank">
-                            <div class="news-item-img">
-                                ${item.thumb ? `<img src="${item.thumb}" alt="" loading="lazy">` : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>'}
-                            </div>
-                            <div class="news-item-content">
-                                <div class="news-item-title">${item.title}</div>
-                                <div class="news-item-date">${item.date}</div>
-                            </div>
-                        </a>
-                    `).join('');
-                    if (data.length > 8) {
-                        list.innerHTML += '<a class="news-more" href="javascript:void(0)">查看更多 →</a>';
-                    }
-                })
-                .catch(() => {
-                    list.innerHTML = '<div class="no-data">内容加载中，请稍后再试</div>';
-                });
-        }
-
-        // Initial load
-        loadNews('news');
-    </script>
+    });
+    startAutoPlay();
+    function toggleNav() {
+        document.getElementById('navOverlay').classList.toggle('open');
+        document.getElementById('navDrawer').classList.toggle('open');
+    }
+    function switchTab(tab) {
+        document.querySelectorAll('.news-tab').forEach(t => t.className = 'news-tab' + (t.dataset.tab === tab ? ' active' : ''));
+        loadNews(tab);
+    }
+    function loadNews(type) {
+        const list = document.getElementById('newsList');
+        const dataFile = type === 'notice' ? 'data/notices.json' : 'data/articles.json';
+        fetch(dataFile).then(r => r.json()).then(data => {
+            if (!data || data.length === 0) { list.innerHTML = '<div class="no-data">暂无内容</div>'; return; }
+            list.innerHTML = data.map(item => `<a class="news-item" href="${item.url}" target="_blank"><div class="news-item-img">${item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>'}</div><div class="news-item-content"><div class="news-item-title">${item.title}</div><div class="news-item-date">${item.date}</div></div></a>`).join('');
+        }).catch(() => { list.innerHTML = '<div class="no-data">内容加载中</div>'; });
+    }
+    loadNews('news');
+</script>
 </body>
 </html>
