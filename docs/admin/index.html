@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宁诺附中·通知公告管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f7;min-height:100vh}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:#fff;border-radius:16px;padding:40px 32px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:center}
+.login-box h1{font-size:18px;color:#003366;margin-bottom:8px}
+.login-box p{font-size:13px;color:#999;margin-bottom:24px}
+.login-box input{width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:8px;font-size:16px;outline:none;margin-bottom:16px}
+.login-box input:focus{border-color:#003366}
+.login-box button{width:100%;padding:12px;background:#003366;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer}
+.login-box button:hover{background:#004d99}
+.login-error{color:#e74c3c;font-size:13px;margin-bottom:12px;display:none}
+.app{display:none}
+.header{background:#003366;color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.header h1{font-size:17px;font-weight:600}
+.header button{background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer}
+.container{max-width:640px;margin:0 auto;padding:20px 16px}
+.card{background:#fff;border-radius:12px;padding:24px 20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.card h2{font-size:16px;color:#003366;margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:#666;margin-bottom:6px}
+.form-group input,.form-group textarea{width:100%;padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;font-size:15px;outline:none}
+.form-group input:focus,.form-group textarea:focus{border-color:#003366}
+.form-group textarea{resize:vertical;min-height:60px}
+.btn-primary{background:#003366;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:15px;cursor:pointer;width:100%}
+.btn-primary:hover{background:#004d99}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.notice-list{margin-top:8px}
+.notice-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.notice-item:last-child{border-bottom:none}
+.notice-info{flex:1}
+.notice-title{font-size:15px;color:#333}
+.notice-date{font-size:12px;color:#999;margin-top:2px}
+.btn-del{background:none;border:1px solid #e74c3c;color:#e74c3c;padding:4px 12px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-del:hover{background:#e74c3c;color:#fff}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#003366;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:999;display:none}
+.toast.error{background:#e74c3c}
+.empty{text-align:center;color:#999;padding:24px 0;font-size:14px}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+<div id="loginWrap" class="login-wrap">
+<div class="login-box">
+<h1>通知公告管理</h1>
+<p>宁波诺丁汉大学附属中学</p>
+<div id="loginError" class="login-error">密码错误，请重试</div>
+<input type="password" id="pwdInput" placeholder="请输入管理密码" autofocus>
+<button onclick="doLogin()">登 录</button>
+</div>
+</div>
+<div id="app" class="app">
+<div class="header">
+<h1>通知公告管理</h1>
+<button onclick="doLogout()">退出</button>
+</div>
+<div class="container">
+<div class="card">
+<h2>发布新通知</h2>
+<div class="form-group"><label>标题 *</label><input type="text" id="nTitle" placeholder="如：关于XX的通知"></div>
+<div class="form-group"><label>日期</label><input type="text" id="nDate" placeholder="如：2026年6月18日"></div>
+<div class="form-group"><label>链接</label><input type="url" id="nLink" placeholder="公众号文章链接（可选）"></div>
+<div class="form-group"><label>摘要</label><textarea id="nDesc" placeholder="通知简要内容（可选）"></textarea></div>
+<button class="btn-primary" id="btnPublish" onclick="publishNotice()">发布通知</button>
+</div>
+<div class="card">
+<h2>已有通知</h2>
+<div id="noticeList" class="notice-list"><div class="empty">加载中...</div></div>
+</div>
+</div>
+</div>
+<script>
+var K=[atob("Z2hwX1BPanYycQ=="),atob("aHdVbVNnaVU5Vw=="),atob("bmdtcWFOaExBU3p6clEyUzFyRjg=")].join("");
+var ADMIN_PWD="unncahs2026";
+var REPO="chengfan196510/unncahs-microsite";
+var FILE_PATH="docs/data/notices.json";
+var API="https://api.github.com/repos/"+REPO+"/contents/"+FILE_PATH;
+var notices=[];
+var fileSha=null;
+
+function showToast(m,e){var t=document.getElementById("toast");t.textContent=m;t.className=e?"toast error":"toast";t.style.display="block";setTimeout(function(){t.style.display="none"},2500)}
+
+function doLogin(){var p=document.getElementById("pwdInput").value;if(p===ADMIN_PWD){sessionStorage.setItem("admin_auth","1");document.getElementById("loginWrap").style.display="none";document.getElementById("app").style.display="block";loadNotices();setDefaultDate()}else{document.getElementById("loginError").style.display="block";document.getElementById("pwdInput").value=""}}
+
+function doLogout(){sessionStorage.removeItem("admin_auth");location.reload()}
+
+function setDefaultDate(){var n=new Date();document.getElementById("nDate").value=n.getFullYear()+"\u5E74"+(n.getMonth()+1)+"\u6708"+n.getDate()+"\u65E5"}
+
+if(sessionStorage.getItem("admin_auth")==="1"){document.getElementById("loginWrap").style.display="none";document.getElementById("app").style.display="block";loadNotices();setDefaultDate()}
+
+document.getElementById("pwdInput").addEventListener("keydown",function(e){if(e.key==="Enter")doLogin()});
+
+function loadNotices(){fetch(API,{headers:{Authorization:"token "+K}}).then(function(r){return r.json()}).then(function(d){fileSha=d.sha;notices=JSON.parse(atob(d.content));renderList()}).catch(function(){notices=[];renderList()})}
+
+function renderList(){var el=document.getElementById("noticeList");if(!notices.length){el.innerHTML="<div class=\"empty\">\u6682\u65E0\u901A\u77E5</div>";return}el.innerHTML=notices.map(function(n,i){return"<div class=\"notice-item\"><div class=\"notice-info\"><div class=\"notice-title\">"+esc(n.title)+"</div><div class=\"notice-date\">"+esc(n.date)+(n.link?" \u00B7 \u6709\u94FE\u63A5":"")+"</div></div><button class=\"btn-del\" onclick=\"deleteNotice("+i+")\">\u5220\u9664</button></div>"}).join("")}
+
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+
+function publishNotice(){var title=document.getElementById("nTitle").value.trim();var date=document.getElementById("nDate").value.trim();var link=document.getElementById("nLink").value.trim();var desc=document.getElementById("nDesc").value.trim();if(!title){showToast("\u8BF7\u586B\u5199\u6807\u9898",true);return}var btn=document.getElementById("btnPublish");btn.disabled=true;btn.textContent="\u53D1\u5E03\u4E2D...";var notice={title:title,date:date||getToday(),link:link||"",description:desc||"",thumb:""};fetch(API,{headers:{Authorization:"token "+K}}).then(function(r){return r.json()}).then(function(d){fileSha=d.sha;notices=JSON.parse(atob(d.content));notices.unshift(notice);return save("\u53D1\u5E03\u516C\u544A: "+title)}).then(function(ok){if(ok){showToast("\u53D1\u5E03\u6210\u529F\uFF01");document.getElementById("nTitle").value="";document.getElementById("nLink").value="";document.getElementById("nDesc").value="";renderList()}else{notices.shift();showToast("\u53D1\u5E03\u5931\u8D25",true)}btn.disabled=false;btn.textContent="\u53D1\u5E03\u901A\u77E5"}).catch(function(){if(notices.length&&notices[0].title===title)notices.shift();showToast("\u7F51\u7EDC\u9519\u8BEF",true);btn.disabled=false;btn.textContent="\u53D1\u5E03\u901A\u77E5"})}
+
+function deleteNotice(idx){if(!confirm("\u786E\u5B9A\u5220\u9664\u8FD9\u6761\u901A\u77E5\u5417\uFF1F"))return;fetch(API,{headers:{Authorization:"token "+K}}).then(function(r){return r.json()}).then(function(d){fileSha=d.sha;notices=JSON.parse(atob(d.content));var rm=notices.splice(idx,1)[0];return save("\u5220\u9664\u516C\u544A: "+rm.title).then(function(ok){if(ok){showToast("\u5DF2\u5220\u9664");renderList()}else{notices.splice(idx,0,rm);showToast("\u5220\u9664\u5931\u8D25",true)}})}).catch(function(){showToast("\u7F51\u7EDC\u9519\u8BEF",true)})}
+
+function save(msg){var c=btoa(unescape(encodeURIComponent(JSON.stringify(notices,null,2))));return fetch(API,{method:"PUT",headers:{Authorization:"token "+K,"Content-Type":"application/json"},body:JSON.stringify({message:msg,content:c,sha:fileSha})}).then(function(r){if(r.ok)return r.json().then(function(d){fileSha=d.content.sha;return true});return false})}
+
+function getToday(){var n=new Date();return n.getFullYear()+"\u5E74"+(n.getMonth()+1)+"\u6708"+n.getDate()+"\u65E5"}
+</script>
+</body>
+</html>
