@@ -318,6 +318,15 @@
         .notice-item-date { font-size: 12px; color: #999; margin-top: 4px; }
         .notice-item-arrow { color: #999; font-size: 10px; transition: transform 0.2s; flex-shrink: 0; margin-left: 10px; }
         .notice-item-body { display: none; padding: 0 0 14px; font-size: 14px; color: #555; line-height: 1.8; border-top: 1px dashed #eee; margin-top: -4px; padding-top: 12px; }
+
+        .news-item { cursor: pointer; position: relative; }
+        .news-item-arrow { color: #999; font-size: 10px; transition: transform 0.2s; flex-shrink: 0; margin-left: 8px; }
+        .article-detail { display: none; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .article-detail-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+        .article-detail-title { font-size: 16px; color: #333; font-weight: 500; line-height: 1.5; margin-bottom: 6px; }
+        .article-detail-date { font-size: 12px; color: #999; margin-bottom: 10px; }
+        .article-detail-link { display: inline-block; padding: 8px 18px; background: #003366; color: #fff; border-radius: 20px; font-size: 14px; text-decoration: none; }
+        .article-detail-link:active { background: #004488; }
         .news-more {
             display: block; text-align: center; padding: 14px;
             color: #0066cc; font-size: 14px; font-weight: 500; margin-top: 12px; cursor: pointer;
@@ -755,13 +764,33 @@
                     '</div>';
                 }).join('');
             } else {
-                list.innerHTML = data.map(item => {
-                    const link = item.url || 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzI5NzczNDM0OQ==';
-                    const noUrl = !item.url;
-                    return '<a class="news-item" href="'+link+'" '+(noUrl ? '' : 'target="_blank"')+'><div class="news-item-img">'+(item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>')+'</div><div class="news-item-content"><div class="news-item-title">'+item.title+(noUrl ? '<span style="font-size:10px;color:#999;margin-left:6px;">查看原文</span>' : '')+'</div><div class="news-item-date">'+item.date+'</div></div></a>';
+                list.innerHTML = data.map((item, idx) => {
+                    var hasUrl = !!item.url;
+                    return '<div class="news-item" onclick="toggleArticle('+idx+')">' +
+                        '<div class="news-item-img">'+(item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>')+'</div>' +
+                        '<div class="news-item-content"><div class="news-item-title">'+item.title+'</div><div class="news-item-date">'+item.date+'</div></div>' +
+                        '<div class="news-item-arrow" id="articleArrow'+idx+'">▶</div>' +
+                    '</div>' +
+                    '<div class="article-detail" id="articleDetail'+idx+'">' +
+                        (item.thumb ? '<img src="'+item.thumb+'" class="article-detail-img" loading="lazy">' : '') +
+                        '<div class="article-detail-title">'+item.title+'</div>' +
+                        '<div class="article-detail-date">'+item.date+'</div>' +
+                        (hasUrl ? '<a href="'+item.url+'" class="article-detail-link" onclick="event.stopPropagation();">阅读原文 →</a>' : '') +
+                    '</div>';
                 }).join('');
             }
         }).catch(() => { list.innerHTML = '<div class="no-data">内容加载中</div>'; });
+    }
+    function toggleArticle(idx) {
+        var body = document.getElementById('articleDetail'+idx);
+        var arrow = document.getElementById('articleArrow'+idx);
+        if (body.style.display === 'block') {
+            body.style.display = 'none';
+            arrow.style.transform = '';
+        } else {
+            body.style.display = 'block';
+            arrow.style.transform = 'rotate(90deg)';
+        }
     }
     function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
     function toggleNotice(idx) {
