@@ -34,27 +34,29 @@ jobs:
           ACCESS_TOKEN="${{ steps.token.outputs.token }}"
           
           # 获取已发布文章列表（只读API，不会修改任何数据）
-          # 官方文档：https://developers.weixin.qq.com/doc/offiaccount/Publish/Publish.html
-          RESPONSE=$(curl -s -X POST "https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token=$ACCESS_TOKEN" \
+          curl -s -X POST "https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token=$ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"offset":0,"count":5,"no_content":1}')
+            -d '{"offset":0,"count":5,"no_content":1}' > /tmp/wx_response.json
           
-          # 提取文章信息
-          python3 << 'PYEOF'
-          import json, sys, os
+          # 提取文章信息并写入JSON
+          python3 -c "
+          import json
+          from datetime import datetime
           
-          data = json.loads('''$( echo "$RESPONSE" | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin)))" )''')
+          with open('/tmp/wx_response.json', 'r') as f:
+              data = json.load(f)
+          
+          if 'errcode' in data and data['errcode'] != 0:
+              print(f'API error: {data}')
+              exit(1)
           
           articles = []
           if 'item' in data:
               for item in data['item'][:5]:
                   news_item = item.get('content', {}).get('news_item', [])
                   publish_time = item.get('update_time', 0)
-                  
-                  from datetime import datetime
                   date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
-                  
-                  for news in news_item[:1]:  # 每次发布取第一条
+                  for news in news_item[:1]:
                       articles.append({
                           'title': news.get('title', ''),
                           'url': news.get('url', ''),
@@ -62,13 +64,11 @@ jobs:
                           'date': date_str
                       })
           
-          # 写入JSON
-          output_path = 'docs/data/articles.json'
-          with open(output_path, 'w', encoding='utf-8') as f:
+          with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
               json.dump(articles, f, ensure_ascii=False, indent=2)
           
-          print(f"Fetched {len(articles)} articles")
-          PYEOF
+          print(f'Fetched {len(articles)} articles')
+          "
 
       - name: Check for Changes
         id: check
