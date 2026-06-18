@@ -308,6 +308,16 @@
             transition: opacity 0.2s;
         }
         .news-expand:hover { opacity: 0.7; }
+
+        .notice-item { border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; }
+        .notice-item:hover { background: #f8f9fa; }
+        .notice-item:last-child { border-bottom: none; }
+        .notice-item-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+        .notice-item-content { flex: 1; }
+        .notice-item-title { font-size: 15px; color: #333; line-height: 1.5; }
+        .notice-item-date { font-size: 12px; color: #999; margin-top: 4px; }
+        .notice-item-arrow { color: #999; font-size: 10px; transition: transform 0.2s; flex-shrink: 0; margin-left: 10px; }
+        .notice-item-body { display: none; padding: 0 0 14px; font-size: 14px; color: #555; line-height: 1.8; border-top: 1px dashed #eee; margin-top: -4px; padding-top: 12px; }
         .news-more {
             display: block; text-align: center; padding: 14px;
             color: #0066cc; font-size: 14px; font-weight: 500; margin-top: 12px; cursor: pointer;
@@ -734,12 +744,38 @@
         const dataFile = type === 'notice' ? 'data/notices.json' : 'data/articles.json';
         fetch(dataFile).then(r => r.json()).then(data => {
             if (!data || data.length === 0) { list.innerHTML = '<div class="no-data">暂无内容</div>'; return; }
-            list.innerHTML = data.map(item => {
-                const link = item.url || 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzI5NzczNDM0OQ==';
-                const noUrl = !item.url;
-                return `<a class="news-item" href="${link}" ${noUrl ? '' : 'target="_blank"'}><div class="news-item-img">${item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>'}</div><div class="news-item-content"><div class="news-item-title">${item.title}${noUrl ? '<span style="font-size:10px;color:#999;margin-left:6px;">查看原文</span>' : ''}</div><div class="news-item-date">${item.date}</div></div></a>`;
-            }).join('');
+            if (type === 'notice') {
+                list.innerHTML = data.map((item, idx) => {
+                    return '<div class="notice-item" onclick="toggleNotice('+idx+')">' +
+                        '<div class="notice-item-header">' +
+                            '<div class="notice-item-content"><div class="notice-item-title">' + escHtml(item.title) + '</div><div class="notice-item-date">' + escHtml(item.date) + '</div></div>' +
+                            '<div class="notice-item-arrow" id="noticeArrow'+idx+'">▶</div>' +
+                        '</div>' +
+                        '<div class="notice-item-body" id="noticeBody'+idx+'">' + (item.description ? escHtml(item.description).replace(/\n/g, '<br>') : '暂无详细内容') + (item.link ? '<br><a href="'+item.link+'" target="_blank" style="color:#003366;font-size:13px;">查看原文 →</a>' : '') + '</div>' +
+                    '</div>';
+                }).join('');
+            } else {
+                list.innerHTML = data.map(item => {
+                    const link = item.url || 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzI5NzczNDM0OQ==';
+                    const noUrl = !item.url;
+                    return '<a class="news-item" href="'+link+'" '+(noUrl ? '' : 'target="_blank"')+'><div class="news-item-img">'+(item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>')+'</div><div class="news-item-content"><div class="news-item-title">'+item.title+(noUrl ? '<span style="font-size:10px;color:#999;margin-left:6px;">查看原文</span>' : '')+'</div><div class="news-item-date">'+item.date+'</div></div></a>';
+                }).join('');
+            }
         }).catch(() => { list.innerHTML = '<div class="no-data">内容加载中</div>'; });
+    }
+    function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function toggleNotice(idx) {
+        var body = document.getElementById('noticeBody'+idx);
+        var arrow = document.getElementById('noticeArrow'+idx);
+        if (body.style.display === 'block') {
+            body.style.display = 'none';
+            arrow.textContent = '▶';
+            arrow.style.transform = '';
+        } else {
+            body.style.display = 'block';
+            arrow.textContent = '▶';
+            arrow.style.transform = 'rotate(90deg)';
+        }
     }
     loadNews('news');
 
