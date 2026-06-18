@@ -33,17 +33,19 @@ jobs:
         run: |
           ACCESS_TOKEN="${{ steps.token.outputs.token }}"
           
-          # 分页获取全部已发布文章列表（只读API，不会修改任何数据）
+          # 分页获取最近一年的已发布文章（只读API，不会修改任何数据）
           python3 -c "
           import json, subprocess, os
-          from datetime import datetime
+          from datetime import datetime, timedelta
           
           access_token = os.environ.get('ACCESS_TOKEN', '')
           all_articles = []
           offset = 0
           page_size = 20
+          one_year_ago = datetime.now() - timedelta(days=365)
+          stop_paging = False
           
-          while True:
+          while not stop_paging:
               cmd = [
                   'curl', '-s', '-X', 'POST',
                   f'https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token={access_token}',
@@ -61,7 +63,14 @@ jobs:
               for item in items:
                   news_item = item.get('content', {}).get('news_item', [])
                   publish_time = item.get('update_time', 0)
-                  date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
+                  if publish_time:
+                      pub_date = datetime.fromtimestamp(publish_time)
+                      if pub_date < one_year_ago:
+                          stop_paging = True
+                          break
+                      date_str = pub_date.strftime('%Y-%m-%d')
+                  else:
+                      date_str = ''
                   for news in news_item[:1]:
                       all_articles.append({
                           'title': news.get('title', ''),
@@ -70,14 +79,14 @@ jobs:
                           'date': date_str
                       })
               
-              if len(items) < page_size or offset + page_size >= data.get('total_count', 0):
+              if len(items) < page_size or stop_paging:
                   break
               offset += page_size
           
           with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
               json.dump(all_articles, f, ensure_ascii=False, indent=2)
           
-          print(f'Fetched {len(all_articles)} articles')
+          print(f'Fetched {len(all_articles)} articles (last 365 days)')
           "
         env:
           ACCESS_TOKEN: ${{ steps.token.outputs.token }}
