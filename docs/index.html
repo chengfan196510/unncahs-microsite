@@ -601,7 +601,11 @@
         const dataFile = type === 'notice' ? 'data/notices.json' : 'data/articles.json';
         fetch(dataFile).then(r => r.json()).then(data => {
             if (!data || data.length === 0) { list.innerHTML = '<div class="no-data">暂无内容</div>'; return; }
-            list.innerHTML = data.map(item => `<a class="news-item" href="${item.url}" target="_blank"><div class="news-item-img">${item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>'}</div><div class="news-item-content"><div class="news-item-title">${item.title}</div><div class="news-item-date">${item.date}</div></div></a>`).join('');
+            list.innerHTML = data.map(item => {
+                const link = item.url || 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzI5NzczNDM0OQ==';
+                const noUrl = !item.url;
+                return `<a class="news-item" href="${link}" ${noUrl ? '' : 'target="_blank"'}><div class="news-item-img">${item.thumb ? '<img src="'+item.thumb+'" alt="" loading="lazy">' : '<div style="width:100%;height:100%;background:#e8eef5;display:flex;align-items:center;justify-content:center;color:#003366;font-size:24px;">诺</div>'}</div><div class="news-item-content"><div class="news-item-title">${item.title}${noUrl ? '<span style="font-size:10px;color:#999;margin-left:6px;">查看原文</span>' : ''}</div><div class="news-item-date">${item.date}</div></div></a>`;
+            }).join('');
         }).catch(() => { list.innerHTML = '<div class="no-data">内容加载中</div>'; });
     }
     loadNews('news');
