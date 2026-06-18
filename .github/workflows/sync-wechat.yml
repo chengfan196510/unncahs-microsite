@@ -30,15 +30,16 @@ jobs:
       - name: Fetch All Published Articles
         id: fetch
         run: |
-          python3 -c "
+          python3 << 'PYEOF'
           import json, subprocess, os
           from datetime import datetime
-          
+
           access_token = os.environ.get('ACCESS_TOKEN', '')
-          all_articles = []
+          all_articles = {}
+          
+          # 1. 从 freepublish 接口获取新版发布文章
           offset = 0
           page_size = 20
-          
           while True:
               cmd = [
                   'curl', '-s', '-X', 'POST',
@@ -48,33 +49,80 @@ jobs:
               ]
               result = subprocess.run(cmd, capture_output=True, text=True)
               data = json.loads(result.stdout)
-              
               if 'errcode' in data and data['errcode'] != 0:
-                  print(f'API error: {data}')
+                  print(f'freepublish API error: {data}')
                   break
-              
               items = data.get('item', [])
               for item in items:
                   news_item = item.get('content', {}).get('news_item', [])
                   publish_time = item.get('update_time', 0)
                   date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
                   for news in news_item:
-                      all_articles.append({
-                          'title': news.get('title', ''),
-                          'url': news.get('url', ''),
-                          'thumb': news.get('thumb_url', ''),
-                          'date': date_str
-                      })
-              
+                      url = news.get('url', '')
+                      if url and url not in all_articles:
+                          all_articles[url] = {
+                              'title': news.get('title', ''),
+                              'url': url,
+                              'thumb': news.get('thumb_url', ''),
+                              'date': date_str,
+                              'source': 'freepublish'
+                          }
               if len(items) < page_size:
                   break
               offset += page_size
           
-          with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
-              json.dump(all_articles, f, ensure_ascii=False, indent=2)
+          print(f'freepublish: {len(all_articles)} articles')
           
-          print(f'Fetched {len(all_articles)} articles')
-          "
+          # 2. 从 material 接口获取素材库文章（覆盖旧版群发）
+          offset = 0
+          page_size = 20
+          material_count = 0
+          while True:
+              cmd = [
+                  'curl', '-s', '-X', 'POST',
+                  f'https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token={access_token}',
+                  '-H', 'Content-Type: application/json',
+                  '-d', json.dumps({'type': 'news', 'offset': offset, 'count': page_size})
+              ]
+              result = subprocess.run(cmd, capture_output=True, text=True)
+              data = json.loads(result.stdout)
+              if 'errcode' in data and data['errcode'] != 0:
+                  print(f'material API error: {data}')
+                  break
+              items = data.get('item', [])
+              for item in items:
+                  news_item = item.get('content', {}).get('news_item', [])
+                  update_time = item.get('update_time', 0)
+                  date_str = datetime.fromtimestamp(update_time).strftime('%Y-%m-%d') if update_time else ''
+                  for news in news_item:
+                      url = news.get('url', '')
+                      if url and url not in all_articles:
+                          all_articles[url] = {
+                              'title': news.get('title', ''),
+                              'url': url,
+                              'thumb': news.get('thumb_url', ''),
+                              'date': date_str,
+                              'source': 'material'
+                          }
+                          material_count += 1
+              if len(items) < page_size:
+                  break
+              offset += page_size
+          
+          print(f'material: {material_count} new articles')
+          
+          # 3. 合并、按日期排序
+          articles = sorted(all_articles.values(), key=lambda x: x.get('date', ''), reverse=True)
+          
+          # 移除source标记
+          for a in articles:
+              a.pop('source', None)
+          
+          with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
+              json.dump(articles, f, ensure_ascii=False, indent=2)
+          
+          print(f'Total: {len(articles)} articles saved')
+          PYEOF
         env:
           ACCESS_TOKEN: ${{ steps.token.outputs.token }}
 
