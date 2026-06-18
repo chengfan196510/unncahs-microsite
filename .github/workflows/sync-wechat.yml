@@ -1,0 +1,89 @@
+name: Sync WeChat Articles
+
+on:
+  schedule:
+    # 每天早上7点和晚上7点各跑一次
+    - cron: '0 23,11 * * *'  # UTC 23:00=北京时间7:00, UTC 11:00=北京时间19:00
+  workflow_dispatch:  # 支持手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get WeChat Access Token
+        id: token
+        run: |
+          RESPONSE=$(curl -s "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${{ secrets.WX_APPID }}&secret=${{ secrets.WX_APPSECRET }}")
+          ACCESS_TOKEN=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))")
+          if [ -z "$ACCESS_TOKEN" ]; then
+            echo "Failed to get access_token"
+            echo "$RESPONSE"
+            exit 1
+          fi
+          echo "token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Fetch Published Articles
+        id: fetch
+        run: |
+          ACCESS_TOKEN="${{ steps.token.outputs.token }}"
+          
+          # 获取已发布文章列表（只读API，不会修改任何数据）
+          # 官方文档：https://developers.weixin.qq.com/doc/offiaccount/Publish/Publish.html
+          RESPONSE=$(curl -s -X POST "https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token=$ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"offset":0,"count":5,"no_content":1}')
+          
+          # 提取文章信息
+          python3 << 'PYEOF'
+          import json, sys, os
+          
+          data = json.loads('''$( echo "$RESPONSE" | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin)))" )''')
+          
+          articles = []
+          if 'item' in data:
+              for item in data['item'][:5]:
+                  news_item = item.get('content', {}).get('news_item', [])
+                  publish_time = item.get('update_time', 0)
+                  
+                  from datetime import datetime
+                  date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
+                  
+                  for news in news_item[:1]:  # 每次发布取第一条
+                      articles.append({
+                          'title': news.get('title', ''),
+                          'url': news.get('url', ''),
+                          'thumb': news.get('thumb_url', ''),
+                          'date': date_str
+                      })
+          
+          # 写入JSON
+          output_path = 'docs/data/articles.json'
+          with open(output_path, 'w', encoding='utf-8') as f:
+              json.dump(articles, f, ensure_ascii=False, indent=2)
+          
+          print(f"Fetched {len(articles)} articles")
+          PYEOF
+
+      - name: Check for Changes
+        id: check
+        run: |
+          if git diff --quiet docs/data/articles.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and Push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/articles.json
+          git commit -m "🔄 同步公众号文章 $(date +%Y-%m-%d)"
+          git push
