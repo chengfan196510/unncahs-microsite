@@ -2,9 +2,8 @@ name: Sync WeChat Articles
 
 on:
   schedule:
-    # 每天早上7点和晚上7点各跑一次
-    - cron: '0 23,11 * * *'  # UTC 23:00=北京时间7:00, UTC 11:00=北京时间19:00
-  workflow_dispatch:  # 支持手动触发
+    - cron: '0 23,11 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,24 +27,19 @@ jobs:
           fi
           echo "token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Fetch Published Articles
+      - name: Fetch All Published Articles
         id: fetch
         run: |
-          ACCESS_TOKEN="${{ steps.token.outputs.token }}"
-          
-          # 分页获取最近一年的已发布文章（只读API，不会修改任何数据）
           python3 -c "
           import json, subprocess, os
-          from datetime import datetime, timedelta
+          from datetime import datetime
           
           access_token = os.environ.get('ACCESS_TOKEN', '')
           all_articles = []
           offset = 0
           page_size = 20
-          one_year_ago = datetime.now() - timedelta(days=365)
-          stop_paging = False
           
-          while not stop_paging:
+          while True:
               cmd = [
                   'curl', '-s', '-X', 'POST',
                   f'https://api.weixin.qq.com/cgi-bin/freepublish/batchget?access_token={access_token}',
@@ -63,15 +57,8 @@ jobs:
               for item in items:
                   news_item = item.get('content', {}).get('news_item', [])
                   publish_time = item.get('update_time', 0)
-                  if publish_time:
-                      pub_date = datetime.fromtimestamp(publish_time)
-                      if pub_date < one_year_ago:
-                          stop_paging = True
-                          break
-                      date_str = pub_date.strftime('%Y-%m-%d')
-                  else:
-                      date_str = ''
-                  for news in news_item[:1]:
+                  date_str = datetime.fromtimestamp(publish_time).strftime('%Y-%m-%d') if publish_time else ''
+                  for news in news_item:
                       all_articles.append({
                           'title': news.get('title', ''),
                           'url': news.get('url', ''),
@@ -79,14 +66,14 @@ jobs:
                           'date': date_str
                       })
               
-              if len(items) < page_size or stop_paging:
+              if len(items) < page_size:
                   break
               offset += page_size
           
           with open('docs/data/articles.json', 'w', encoding='utf-8') as f:
               json.dump(all_articles, f, ensure_ascii=False, indent=2)
           
-          print(f'Fetched {len(all_articles)} articles (last 365 days)')
+          print(f'Fetched {len(all_articles)} articles')
           "
         env:
           ACCESS_TOKEN: ${{ steps.token.outputs.token }}
